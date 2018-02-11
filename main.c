@@ -22,110 +22,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <errno.h>
 #include <signal.h>
 
 #include "config.h"
 #include "server.h"
 #include "signal.h"
 
-int N_CPUS = 1;
-
-void usage(int code)
-{
-    FILE *ff = code == 0 ? stdout : stderr;
-    if (code == 0)
-        fprintf(ff, "%s by %s\n\n", PACKAGE_STRING, PACKAGE_AUTHOR);
-
-    fprintf(ff, "usage:\t%s [-s] [-H HOST] [-p PORT] [-b BACKLOG] [-h]\n\n",
-            PACKAGE_NAME);
-
-    if (code == 0) {
-        fprintf(ff, "Options:\n"
-                        "\t-s\tserver mode (default false, client mode)\n"
-                        "\t-H\thostname or IPv[4|6] address (default %s)\n"
-                        "\t-p\tport (default %s)\n"
-                        "\t-T\tinactive connection TTL in seconds (default %s)\n"
-                        "\t-t\tnumber of threads in pool (default: number of"
-                        " online CPUs, %d on this system)\n"
-                        "\t-b\taccept backlog (default %d)\n"
-                        "\t-h\tthis help message\n\n"
-                        "\tNB:\tUse different combinations of -t and -b\n"
-                        "\t\tto tune this server's performance on your system.\n",
-                PP_HOST, PP_PORT, PP_TTL, N_CPUS, PP_BACKLOG);
-    }
-    exit(code);
-}
-
-int client(const char *host, const char *port)
-{
-    printf("Client to %s:%s\n", host, port);
-    return 0;
-}
-
 int main(int argc, char **argv)
 {
-    bool server_mode = false;
-    char *restrict host = PP_HOST;
-    char *restrict port = PP_PORT;
-    int backlog = PP_BACKLOG;
-    int ttl = PP_TTL;
-    N_CPUS = (int) sysconf(_SC_NPROCESSORS_ONLN);
-
-    int c;
-    while ((c = getopt(argc, argv, "+sH:p:T:b:t:h?")) != -1) {
-        switch (c) {
-            case 'h':
-                usage(EXIT_SUCCESS);
-            case '?':
-                fprintf(stderr, "Invalid option -%c\n", optopt);
-                usage(EINVAL);
-            case 's':
-                server_mode = true;
-                break;
-            case 'H':
-                host = optarg;
-                break;
-            case 'p':
-                port = optarg;
-                break;
-            case 'T': {
-                int t = (int) strtol(optarg, (char **) NULL, 10);
-                if (t > 0)
-                    ttl = t;
-            }
-                break;
-            case 'b': {
-                int bl = (int) strtol(optarg, (char **) NULL, 10);
-                if (bl > 0)
-                    backlog = bl;
-            }
-                break;
-            case 't': {
-                int nt = (int) strtol(optarg, (char **) NULL, 10);
-                if (nt > 0)
-                    N_CPUS = nt;
-            }
-                break;
-            default:
-                /*
-                 * this should never happen :)
-                 */
-                abort();
-        }
-    }
-
+    options_t *opts = options(argc, argv);
     /*
      * Block SIGINT catching for subsequent threads
      */
-    sigset_t sigset = { 0 };
-    sigset_t oldset = { 0 };
+    sigset_t sigset = {{ 0 }};
+    sigset_t oldset = {{ 0 }};
     sigaddset(&sigset, SIGINT);
     pthread_sigmask(SIG_BLOCK, &sigset, &oldset);
 
-    tpool_t *tp = tpool_init(N_CPUS);
+    tpool_t *tp = tpool_init(opts->n_threads);
     printf("Created thread pool with %d workers.\n", tp->n_threads);
 
     /*
@@ -142,9 +56,7 @@ int main(int argc, char **argv)
     /*
      * This could probably have it's own separate thread
      */
-    int ret = server_mode
-              ? server_create(host, port, backlog, ttl, tp)
-              : client(host, port);
+    int ret = server_create(tp, opts);
 
     tpool_destroy(tp);
     printf("\n%s\n", PP_SERVER_HUP);

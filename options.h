@@ -20,26 +20,21 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_SOCKET_H
-#define PING_PONG_SOCKET_H
+#ifndef PING_PONG_OPTIONS_H
+#define PING_PONG_OPTIONS_H
 
-#include <netdb.h>
+#include <stdbool.h>
 
-typedef struct {
-    int sd;
-    struct addrinfo *addr;
-} socket_t;
+typedef struct options_struct {
+    bool verbose;
+    int n_threads;
+    int backlog;
+    int ttl;
+    char *host;
+    char *port;
+} options_t;
 
-typedef struct {
-    int port;
-    char host[INET6_ADDRSTRLEN];
-} peer_addr_t;
+void usage(int code);
+options_t *options(int argc, char **argv);
 
-socket_t *socket_init(const char *restrict host, const char *restrict port);
-int socket_listen(socket_t *restrict pps, unsigned int backlog);
-int socket_accept(socket_t *server);
-void socket_cleanup(socket_t *pps);
-
-peer_addr_t *peer_addr(int pfd);
-
-#endif /* PING_PONG_SOCKET_H */
+#endif /* PING_PONG_OPTIONS_H */

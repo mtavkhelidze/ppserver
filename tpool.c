@@ -30,8 +30,7 @@
 #define is_shutdown(x) ((x)->flags & TPF_SHUTDOWN)
 #define set_shutdown(x) ((x)->flags |= TPF_SHUTDOWN)
 
-static tpool_job_t *
-_job_init(worker_routine_args worker, worker_routine_args args)
+static tpool_job_t *_job_init(functor_t worker, void *args)
 {
     tpool_job_t *job;
     if ((job = malloc(sizeof(tpool_job_t))) == NULL) {
@@ -39,7 +38,7 @@ _job_init(worker_routine_args worker, worker_routine_args args)
         abort();
     }
 
-    job->worker = worker;
+    job->worker = (functor_t )worker;
     job->args = args;
     job->next = NULL;
     return job;
@@ -67,6 +66,7 @@ static void _remove_job(tpool_t *pt)
 static void _tpool_free(tpool_t *tp)
 {
     for (tpool_job_t *j = tp->j_head; j != NULL; j = j->next) {
+        free(j->args);
         free(j);
     }
     tp->j_head = NULL;
@@ -92,19 +92,19 @@ static void *_tpool_thread(void *data)
         }
 
         if (is_shutdown(tp)) {
-            tp->n_threads--;
             pthread_mutex_unlock(&(tp->pool_lock));
-            pthread_exit(NULL);
             return NULL;
         }
 
-        worker_routine fn = tp->j_head->worker;
-        worker_routine_args args = tp->j_head->args;
+        functor_t fn = (functor_t )tp->j_head->worker;
+        void *args = tp->j_head->args;
         _remove_job(tp);
 
         pthread_mutex_unlock(&(tp->pool_lock));
 
         (*fn)(args);
+
+        free(args);
     }
 
     return NULL;
@@ -203,15 +203,12 @@ cleanup:
     if (err) {
         abort();
     }
-    /*
-     * We should probably abort(3) on error here.
-     */
 
+    _tpool_free(tp);
     return err;
 }
 
-int
-tpool_add_job(tpool_t *tp, worker_routine worker, worker_routine_args args)
+int tpool_add_job(tpool_t *tp, functor_t worker, void *args)
 {
     if (tp == NULL || worker == NULL) {
         return EINVAL;

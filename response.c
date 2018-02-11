@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
-#include <pthread.h>
 #include <unistd.h>
 
 #ifdef __linux__
@@ -36,6 +35,9 @@
 #include "socket.h"
 #include "response.h"
 #include "signal.h"
+#include "options.h"
+
+extern options_t opts;
 
 static int _set_minimum_recv_size(int pfd, size_t blen)
 {
@@ -59,12 +61,14 @@ static int _set_connection_timeout(int pfd, int tout)
     return ret;
 }
 
-static void _report_connection(int pfd)
+static void _report_connection(int pfd, bool open)
 {
     peer_addr_t *p;
     p = peer_addr(pfd);
-    printf("%p: Connection %d: from %s on port %d\n", pthread_self(), pfd,
-           p->host, p->port);
+    if (open)
+        printf("Open connection from %s on port %d\n", p->host, p->port);
+    else
+        printf("Close connection from %s on port %d\n", p->host, p->port);
     free(p);
 }
 
@@ -90,13 +94,13 @@ void response_talk(void *args)
 {
     response_t *r = (response_t *) args;
     int pfd = r->pfd;
-    free(args);
 
     size_t blen = strlen(PP_CLIENT_REQ);
     char buf[blen + 1];
     memset(buf, 0, blen + 1);
 
-    //_report_connection(pfd);
+    if (opts.verbose)
+        _report_connection(pfd, true);
 
     /*
      * Don't terminate on SIGUSR1, just wake
@@ -106,7 +110,7 @@ void response_talk(void *args)
 
     do {
         if (_set_minimum_recv_size(pfd, blen) < 0 ||
-            _set_connection_timeout(pfd, 60) < 0) {
+            _set_connection_timeout(pfd, opts.ttl) < 0) {
             break;
         };
 
@@ -135,6 +139,9 @@ void response_talk(void *args)
         if (_response_norm(pfd) < 0)
             break;
     } while (false);
+
+    if (opts.verbose)
+        _report_connection(pfd, false);
 
     close(pfd);
 }

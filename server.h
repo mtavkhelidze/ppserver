@@ -24,8 +24,8 @@
 #define PING_PONG_SERVER_H
 
 #include "tpool.h"
+#include "options.h"
 
-int server_create(const char *host, const char *port, int backlog, int ttl,
-                  tpool_t *tp);
+int server_create(tpool_t *tp, options_t *opts);
 
-#endif // PING_PONG_SERVER_H
+#endif /* PING_PONG_SERVER_H */

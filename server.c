@@ -27,27 +27,28 @@
 #include "socket.h"
 #include "response.h"
 #include "tpool.h"
+#include "options.h"
 
-int server_create(const char *host, const char *port,
-                  int backlog, int ttl, tpool_t *tp)
+int server_create(tpool_t *tp, options_t *opts)
 {
     socket_t *srv;
 
     int retval = 0;
-    if ((srv = socket_init(NULL, port)) == NULL) {
+    if ((srv = socket_init(opts->host, opts->port)) == NULL) {
         perror("Cannot create socket");
         retval = EINVAL;
         goto cleanup;
     }
 
-    if (socket_listen(srv, (unsigned int) backlog) != 0) {
+    if (socket_listen(srv, (unsigned int) opts->backlog) != 0) {
         perror("Cannot create socket");
         retval = EINVAL;
         goto cleanup;
     }
 
-    printf("Accepting connections on %s:%s (backlog: %d).\n", host, port,
-           backlog);
+    printf("Accepting connections on %s:%s (backlog: %d, ttl: %d).\n",
+           opts->host,
+           opts->port, opts->backlog, opts->ttl);
 
     for (;;) {
         int pfd;

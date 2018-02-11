@@ -40,6 +40,10 @@ endif ()
 
 configure_file(config.h.cmake config.h)
 
+if (${CMAKE_COMPILER_IS_GNUCC})
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Werror")
+endif ()
+
 add_executable(${PROJECT_NAME}
         main.c
         socket.c
@@ -52,6 +56,6 @@ add_executable(${PROJECT_NAME}
         tpool.h
         signal.c
         signal.h
-        )
+        options.c options.h)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

@@ -27,17 +27,14 @@
 
 typedef enum {
     TPF_NONE = 0x0,
-    TPF_SHUTDOWN = 0x1,
-    TPF_IGNORE_SIGINT = 0x2
+    TPF_SHUTDOWN = 0x1
 } tpool_flags_t;
 
-typedef void (*worker_routine)(void *);
-
-typedef void *worker_routine_args;
+typedef void (*functor_t)(void *);
 
 typedef struct _thread_job_t {
-    worker_routine worker;
-    worker_routine_args args;
+    functor_t worker;
+    void *args;
     struct _thread_job_t *next;
 } tpool_job_t;
 
@@ -57,6 +54,6 @@ typedef struct {
 
 tpool_t *tpool_init(int n_threads);
 int tpool_destroy(tpool_t *tp);
-int tpool_add_job(tpool_t *tp, worker_routine worker, worker_routine_args args);
+int tpool_add_job(tpool_t *tp, functor_t worker, void *args);
 
-#endif // PING_PONG_TPOOL_H
+#endif /* PING_PONG_TPOOL_H */
