@@ -1,7 +1,7 @@
 Ping-Pong CS
 ---
 
-A simple multi-threaded client-server_create demo in [C11](1) using [OpenMP](2).
+A simple multi-threaded server demo in [C11](1) using [pthreads](2) pool.
 
 ---
 ## Prerequisites
@@ -15,11 +15,9 @@ $ sudo yum -y install cmake3
 
 ### Install CMake on MacOS
 
-On `macos` you'll need `gcc` as `clang` doesn't support OpenMP
-yet. So, if you haven't yet, first install [brew](3). Then:
+On `macos` you'll need if you haven't yet, first install [brew](3). Then:
 
 ```bash
-$ brew install gcc7
 $ brew install cmake
 ```
 
@@ -51,5 +49,5 @@ $ make
 ```
 
 [1]: https://en.wikipedia.org/wiki/C11_(C_standard_revision)
-[2]: http://www.openmp.org
+[2]: https://computing.llnl.gov/tutorials/pthreads/
 [3]: https://brew.sh/index_fr.html
