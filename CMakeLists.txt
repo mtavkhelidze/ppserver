@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 project(ping-pong LANGUAGES C VERSION 1.0)
 
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+set(CMAKE_C_STANDARD 11)
+
+if (${CMAKE_COMPILER_IS_GNUCC})
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Werror")
 endif ()
 
-set(CMAKE_C_STANDARD 11)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 if (NOT DEFINED PP_PORT)
     # Right after com-bardac-dw in /etc/services
@@ -40,10 +41,6 @@ endif ()
 
 configure_file(config.h.cmake config.h)
 
-if (${CMAKE_COMPILER_IS_GNUCC})
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Werror")
-endif ()
-
 add_executable(${PROJECT_NAME}
         main.c
         socket.c
@@ -58,4 +55,5 @@ add_executable(${PROJECT_NAME}
         signal.h
         options.c options.h)
 
+target_link_libraries(${PROJECT_NAME} Threads::Threads)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
