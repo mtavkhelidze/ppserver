@@ -31,8 +31,8 @@ typedef struct {
 } socket_t;
 
 typedef struct {
-    char host[INET6_ADDRSTRLEN];
     int port;
+    char host[INET6_ADDRSTRLEN];
 } peer_addr_t;
 
 socket_t *socket_init(const char *restrict host, const char *restrict port);
@@ -42,4 +42,4 @@ void socket_cleanup(socket_t *pps);
 
 peer_addr_t *peer_addr(int pfd);
 
-#endif //PING_PONG_SOCKET_H
+#endif // PING_PONG_SOCKET_H

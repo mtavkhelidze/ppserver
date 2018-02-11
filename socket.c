@@ -111,7 +111,6 @@ int socket_accept(socket_t *server)
     socklen_t peer_len = sizeof(struct sockaddr_storage);
 
     if ((cfd = accept(server->sd, (struct sockaddr *) &peer, &peer_len)) < 0) {
-        perror("Cannot accept");
         return -1;
     }
     return cfd;
@@ -151,10 +150,8 @@ peer_addr_t *peer_addr(int pfd)
          *
          * Any of those *should never happen* here.
          */
-        _fill_peer_addr(peer, (struct sockaddr *)&p);
+        _fill_peer_addr(peer, (struct sockaddr *) &p);
         return peer;
     };
-    perror("Cannot get peer name");
-
     return NULL;
 }

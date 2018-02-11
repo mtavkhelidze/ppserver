@@ -23,6 +23,12 @@
 #ifndef PING_PONG_RESPONSE_H
 #define PING_PONG_RESPONSE_H
 
-void server_respond(int pfd);
+#include <stdbool.h>
 
-#endif //PING_PONG_RESPONSE_H
+typedef struct {
+    int pfd;
+} response_t;
+
+void response_talk(void *args);
+
+#endif /* PING_PONG_RESPONSE_H */

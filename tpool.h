@@ -20,12 +20,43 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_SERVER_H
-#define PING_PONG_SERVER_H
+#ifndef PING_PONG_TPOOL_H
+#define PING_PONG_TPOOL_H
 
-#include "tpool.h"
+#include <pthread.h>
 
-int server_create(const char *host, const char *port, int backlog, int ttl,
-                  tpool_t *tp);
+typedef enum {
+    TPF_NONE = 0x0,
+    TPF_SHUTDOWN = 0x1,
+    TPF_IGNORE_SIGINT = 0x2
+} tpool_flags_t;
 
-#endif // PING_PONG_SERVER_H
+typedef void (*worker_routine)(void *);
+
+typedef void *worker_routine_args;
+
+typedef struct _thread_job_t {
+    worker_routine worker;
+    worker_routine_args args;
+    struct _thread_job_t *next;
+} tpool_job_t;
+
+typedef struct {
+    tpool_flags_t flags;
+
+    int n_threads;
+    int n_jobs;
+
+    pthread_t *threads;
+    tpool_job_t *j_head;
+    tpool_job_t *j_tail;
+
+    pthread_cond_t job_notify;
+    pthread_mutex_t pool_lock;
+} tpool_t;
+
+tpool_t *tpool_init(int n_threads);
+int tpool_destroy(tpool_t *tp);
+int tpool_add_job(tpool_t *tp, worker_routine worker, worker_routine_args args);
+
+#endif // PING_PONG_TPOOL_H

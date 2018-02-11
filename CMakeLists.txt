@@ -22,6 +22,10 @@ if (NOT DEFINED PP_BACKLOG)
     set(PP_BACKLOG 10)
 endif ()
 
+if (NOT DEFINED PP_TTL)
+    set(PP_TTL 60)
+endif ()
+
 if (NOT DEFINED PP_CLIENT_REQ)
     set(PP_CLIENT_REQ "PING")
 endif ()
@@ -44,6 +48,10 @@ add_executable(${PROJECT_NAME}
         server.h
         response.c
         response.h
+        tpool.c
+        tpool.h
+        signal.c
+        signal.h
         )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

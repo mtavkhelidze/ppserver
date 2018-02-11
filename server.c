@@ -20,22 +20,22 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <stdbool.h>
 #include <errno.h>
 #include <stdio.h>
-#include <omp.h>
+#include <stdlib.h>
 
 #include "socket.h"
-#include "server.h"
 #include "response.h"
+#include "tpool.h"
 
-int server_create(const char *host, const char *port, int backlog)
+int server_create(const char *host, const char *port,
+                  int backlog, int ttl, tpool_t *tp)
 {
     socket_t *srv;
 
     int retval = 0;
     if ((srv = socket_init(NULL, port)) == NULL) {
-        perror("Cannot create socket.");
+        perror("Cannot create socket");
         retval = EINVAL;
         goto cleanup;
     }
@@ -46,24 +46,32 @@ int server_create(const char *host, const char *port, int backlog)
         goto cleanup;
     }
 
-    printf("Server running at %s:%s\n", host, port);
+    printf("Accepting connections on %s:%s (backlog: %d).\n", host, port,
+           backlog);
 
-    while (true) {
-        omp_set_num_threads(backlog);
-        #pragma omp parallel
-        {
-            int pfd = socket_accept(srv);
-            {
-                if (pfd < 0) {
-                    fprintf(stderr, "Cannot accept.");
-                } else {
-                    server_respond(pfd);
-                }
+    for (;;) {
+        int pfd;
+
+        if ((pfd = socket_accept(srv)) < 0) {
+            if (errno == EINTR) {
+                retval = 0;
+                goto cleanup;
             }
+            perror("Cannot accept");
+        } else {
+            response_t *r;
+
+            if ((r = malloc(sizeof(response_t))) == NULL) {
+                perror("Cannot allocate response_t");
+                return EINVAL;
+            }
+
+            r->pfd = pfd;
+            tpool_add_job(tp, response_talk, (void *) r);
         }
     };
 
-    cleanup:
+cleanup:
     if (srv != NULL)
         socket_cleanup(srv);
 

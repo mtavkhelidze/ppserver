@@ -20,12 +20,19 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_SERVER_H
-#define PING_PONG_SERVER_H
+#include <signal.h>
+#include <stddef.h>
 
-#include "tpool.h"
+static void _ignore(int sig)
+{
+    (void) sig;
+}
 
-int server_create(const char *host, const char *port, int backlog, int ttl,
-                  tpool_t *tp);
-
-#endif // PING_PONG_SERVER_H
+void ignore_signal(int sig)
+{
+    struct sigaction s;
+    s.sa_handler = _ignore;
+    sigemptyset(&s.sa_mask);
+    s.sa_flags = 0;
+    sigaction(sig, &s, NULL);
+}

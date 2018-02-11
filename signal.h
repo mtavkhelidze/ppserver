@@ -20,12 +20,9 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_SERVER_H
-#define PING_PONG_SERVER_H
+#ifndef PING_PONG_SIGNAL_H
+#define PING_PONG_SIGNAL_H
 
-#include "tpool.h"
+void ignore_signal(int sig);
 
-int server_create(const char *host, const char *port, int backlog, int ttl,
-                  tpool_t *tp);
-
-#endif // PING_PONG_SERVER_H
+#endif /* PING_PONG_SIGNAL_H */
