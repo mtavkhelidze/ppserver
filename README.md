@@ -1,9 +1,15 @@
 Ping-Pong CS
 ---
 
-A simple multi-threaded server demo in [C11](1) using [pthreads](2) pool.
+A simple multi-threaded server and client demo in [C11](1) using [pthreads](2).
 
 ---
+
+## Running
+
+Once build (see below) run `ping-pong -h`
+(server) or `ping-pong-client -h` (client).
+
 ## Prerequisites
 
 ### Install CMake 3 on CentOS
