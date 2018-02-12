@@ -1,4 +1,8 @@
+#ifdef PP_SERVER
 #define PACKAGE_NAME "${PROJECT_NAME}"
+#else
+#define PACKAGE_NAME "${PROJECT_NAME}-client"
+#endif
 #define PACKAGE_VERSION "${PROJECT_VERSION}"
 #define PACKAGE_STRING PACKAGE_NAME " v" PACKAGE_VERSION
 #define PACKAGE_AUTHOR "Misha Tavkhelidze <misha.tavkhelidze@gmail.com>"

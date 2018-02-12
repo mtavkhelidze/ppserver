@@ -36,56 +36,30 @@
 #include "response.h"
 #include "signal.h"
 #include "options.h"
+#include "protocol.h"
+#include "util.h"
 
 extern options_t opts;
 
-static int _set_minimum_recv_size(int pfd, size_t blen)
-{
-    int ret = 0;
-    if ((ret = setsockopt(pfd, SOL_SOCKET, SO_RCVLOWAT, (const void *) &blen,
-                          sizeof(blen))) < 0) {
-        perror("setsockopt(SO_RCVLOWAT) failed");
-    }
-    return ret;
-}
-
-static int _set_connection_timeout(int pfd, int tout)
-{
-    int ret = 0;
-    struct timeval tv = { 0 };
-    tv.tv_sec = tout;
-    if ((ret = setsockopt(pfd, SOL_SOCKET, SO_RCVTIMEO, (const void *) &tv,
-                          sizeof(tv))) < 0) {
-        perror("setsockopt(SO_RCVTIMEO) failed");
-    }
-    return ret;
-}
-
-static void _report_connection(int pfd, bool open)
-{
-    peer_addr_t *p;
-    p = peer_addr(pfd);
-    if (open)
-        printf("Open connection from %s on port %d\n", p->host, p->port);
-    else
-        printf("Close connection from %s on port %d\n", p->host, p->port);
-    free(p);
-}
-
 int _response_hup(int pfd)
 {
-    if (send(pfd, PP_SERVER_HUP, strlen(PP_SERVER_HUP), 0) < 0) {
+    size_t rlen = 0;
+    const char *res = proto_hup(&rlen);
+    if (send(pfd, res, rlen, 0) < 0) {
         perror("Cannot send");
         return -1;
     }
     return 0;
 }
 
-int _response_norm(int pfd)
+int _response_norm(int pfd, const char *req, ssize_t rlen)
 {
-    if (send(pfd, PP_SERVER_RES, strlen(PP_SERVER_RES), 0) < 0) {
-        perror("Cannot send");
-        return -1;
+    const char *res = proto_response(req, (size_t *) &rlen);
+    if (res != NULL) {
+        if (send(pfd, res, (size_t) rlen, 0) < 0) {
+            perror("Cannot send");
+            return -1;
+        }
     }
     return 0;
 }
@@ -100,7 +74,7 @@ void response_talk(void *args)
     memset(buf, 0, blen + 1);
 
     if (opts.verbose)
-        _report_connection(pfd, true);
+        report_peer_connection(pfd, true);
 
     /*
      * Don't terminate on SIGUSR1, just wake
@@ -108,12 +82,12 @@ void response_talk(void *args)
      */
     ignore_signal(SIGUSR1);
 
-    do {
-        if (_set_minimum_recv_size(pfd, blen) < 0 ||
-            _set_connection_timeout(pfd, opts.ttl) < 0) {
-            break;
-        };
+    if (set_min_recv_len(pfd, blen) < 0 ||
+        set_connection_timeout(pfd, opts.ttl) < 0) {
+        goto error;
+    };
 
+    do {
         ssize_t nbytes = recv(pfd, buf, blen, 0);
 
         /*
@@ -136,12 +110,13 @@ void response_talk(void *args)
             break;
         }
 
-        if (_response_norm(pfd) < 0)
+        if (_response_norm(pfd, buf, nbytes) < 0)
             break;
-    } while (false);
+    } while (true);
 
+error:
     if (opts.verbose)
-        _report_connection(pfd, false);
+        report_peer_connection(pfd, false);
 
     close(pfd);
 }

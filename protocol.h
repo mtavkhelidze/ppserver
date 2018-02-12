@@ -20,22 +20,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_OPTIONS_H
-#define PING_PONG_OPTIONS_H
+#ifndef PING_PONG_PROTOCOL_H
+#define PING_PONG_PROTOCOL_H
 
-#include <stdbool.h>
+const char *proto_response(const char *req, size_t *rlen);
+const char *proto_request(size_t *rlen);
+const char *proto_hup(size_t *rlen);
 
-typedef struct options_struct {
-    bool verbose;
-    int n_threads;
-#ifdef PP_SERVER
-    int backlog;
-    int ttl;
-#endif
-    char *host;
-    char *port;
-} options_t;
-
-options_t *options(int argc, char **argv);
-
-#endif /* PING_PONG_OPTIONS_H */
+#endif /* PING_PONG_PROTOCOL_H */

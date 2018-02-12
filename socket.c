@@ -28,6 +28,28 @@
 
 #include "socket.h"
 
+void _fill_peer_addr(peer_addr_t *peer, struct sockaddr *restrict addr)
+{
+    socklen_t plen = sizeof(peer->host);
+
+    /**
+     * As per man page, inet_ntop(3) fails only if
+     * ss_family is wrong or the converted address string
+     * would exceed the size given by last parameter.
+     *
+     * Any of those *should never happen* here.
+     */
+    if (addr->sa_family == AF_INET) {
+        inet_ntop(addr->sa_family,
+                  &((struct sockaddr_in *) addr)->sin_addr, peer->host, plen);
+        peer->port = ((struct sockaddr_in *) addr)->sin_port;
+    } else {
+        inet_ntop(addr->sa_family, &((struct sockaddr_in6 *) addr)->sin6_addr,
+                  peer->host, plen);
+        peer->port = ((struct sockaddr_in6 *) addr)->sin6_port;
+    }
+}
+
 socket_t *socket_init(const char *restrict host, const char *restrict port)
 {
     int sd = -1;
@@ -87,6 +109,15 @@ void socket_cleanup(socket_t *pps)
     free(pps);
 }
 
+int socket_connect(socket_t *restrict so)
+{
+    if (connect(so->sd, so->addr->ai_addr, so->addr->ai_addrlen) == 0) {
+        return 0;
+    }
+    perror("Cannot connect");
+    return -1;
+}
+
 int socket_listen(socket_t *restrict pps, unsigned int backlog)
 {
     if (bind(pps->sd, pps->addr->ai_addr,
@@ -116,21 +147,6 @@ int socket_accept(socket_t *server)
     return cfd;
 }
 
-void _fill_peer_addr(peer_addr_t *peer, struct sockaddr *restrict addr)
-{
-    socklen_t plen = sizeof(peer->host);
-
-    if (addr->sa_family == AF_INET) {
-        inet_ntop(addr->sa_family,
-                  &((struct sockaddr_in *) addr)->sin_addr, peer->host, plen);
-        peer->port = ((struct sockaddr_in *) addr)->sin_port;
-    } else {
-        inet_ntop(addr->sa_family, &((struct sockaddr_in6 *) addr)->sin6_addr,
-                  peer->host, plen);
-        peer->port = ((struct sockaddr_in6 *) addr)->sin6_port;
-    }
-}
-
 peer_addr_t *peer_addr(int pfd)
 {
     peer_addr_t *peer;
@@ -142,16 +158,30 @@ peer_addr_t *peer_addr(int pfd)
             perror("Cannot allocate memory");
             abort();
         }
-
-        /**
-         * As per man page, inet_ntop(3) fails only if
-         * ss_family is wrong or the converted address string
-         * would exceed the size given by last parameter.
-         *
-         * Any of those *should never happen* here.
-         */
         _fill_peer_addr(peer, (struct sockaddr *) &p);
         return peer;
     };
     return NULL;
+}
+
+int set_connection_timeout(int pfd, int timeout)
+{
+    int ret = 0;
+    struct timeval tv = { 0 };
+    tv.tv_sec = timeout;
+    if ((ret = setsockopt(pfd, SOL_SOCKET, SO_RCVTIMEO, (const void *) &tv,
+                          sizeof(tv))) < 0) {
+        perror("setsockopt(SO_RCVTIMEO) failed");
+    }
+    return ret;
+}
+
+int set_min_recv_len(int pfd, size_t len)
+{
+    int ret = 0;
+    if ((ret = setsockopt(pfd, SOL_SOCKET, SO_RCVLOWAT, (const void *) &len,
+                          sizeof(len))) < 0) {
+        perror("setsockopt(SO_RCVLOWAT) failed");
+    }
+    return ret;
 }

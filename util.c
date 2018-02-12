@@ -20,22 +20,19 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_OPTIONS_H
-#define PING_PONG_OPTIONS_H
-
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-typedef struct options_struct {
-    bool verbose;
-    int n_threads;
-#ifdef PP_SERVER
-    int backlog;
-    int ttl;
-#endif
-    char *host;
-    char *port;
-} options_t;
+#include "socket.h"
 
-options_t *options(int argc, char **argv);
-
-#endif /* PING_PONG_OPTIONS_H */
+void report_peer_connection(int pfd, bool open)
+{
+    peer_addr_t *p;
+    p = peer_addr(pfd);
+    if (open)
+        printf("Open connection from %s on port %d\n", p->host, p->port);
+    else
+        printf("Close connection from %s on port %d\n", p->host, p->port);
+    free(p);
+}

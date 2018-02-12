@@ -20,22 +20,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_OPTIONS_H
-#define PING_PONG_OPTIONS_H
+#ifndef PING_PONG_UTIL_H
+#define PING_PONG_UTIL_H
 
 #include <stdbool.h>
 
-typedef struct options_struct {
-    bool verbose;
-    int n_threads;
-#ifdef PP_SERVER
-    int backlog;
-    int ttl;
-#endif
-    char *host;
-    char *port;
-} options_t;
+void report_peer_connection(int pfd, bool open);
 
-options_t *options(int argc, char **argv);
-
-#endif /* PING_PONG_OPTIONS_H */
+#endif /* PING_PONG_UTIL_H */

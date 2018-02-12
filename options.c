@@ -34,8 +34,10 @@
 
 options_t opts = {
     .n_threads = 1,
+#ifdef PP_SERVER
     .backlog = PP_BACKLOG,
     .ttl = PP_TTL,
+#endif
     .host = PP_HOST,
     .port = PP_PORT
 };
@@ -46,23 +48,36 @@ void usage(int code)
     if (code == 0)
         fprintf(ff, "%s by %s\n\n", PACKAGE_STRING, PACKAGE_AUTHOR);
 
-    fprintf(ff,
-            "usage:\t%s [-H HOST] [-p PORT] [-T TTL] [-t THREADS] [-b BACKLOG] [-h]\n\n",
-            PACKAGE_NAME);
+#ifdef PP_SERVER
+    const char *header = "usage:\t%s [-H HOST] [-p PORT] "
+        "[-t THREADS] [-T TTL] [-b BACKLOG] [-v] [-h]\n\n";
+#else
+    const char *header = "usage:\t%s [-H HOST] [-p PORT] [-t THREADS] "
+    "[-v] [-h]\n\n";
+#endif
+    fprintf(ff, header, PACKAGE_NAME);
 
     if (code == 0) {
         fprintf(ff, "Options:\n"
                     "\t-H\thostname or IPv[4|6] address (default %s)\n"
                     "\t-p\tport (default %s)\n"
-                    "\t-T\tinactive connection TTL in seconds (default %d)\n"
-                    "\t-t\tnumber of threads in pool (default: number of"
+                    "\t-t\tnumber of threads (default: number of"
                     " online CPUs, %d on this system)\n"
+#ifdef PP_SERVER
+                    "\t-T\tinactive connection TTL in seconds (default %d)\n"
                     "\t-b\taccept backlog (default %d)\n"
+#endif
                     "\t-v\tbe a little bit verbose\n"
                     "\t-h\tthis help message\n\n"
+#ifdef PP_SERVER
                     "\tNB:\tUse different combinations of -t and -b\n"
-                    "\t\tto tune this server's performance on your system.\n",
-                opts.host, opts.port, opts.ttl, opts.n_threads, opts.backlog);
+                    "\t\tto tune this server's performance on your system.\n"
+#endif
+            , opts.host, opts.port, opts.n_threads
+#ifdef PP_SERVER
+            , opts.ttl, opts.backlog
+#endif
+        );
     }
     exit(code);
 }
@@ -74,7 +89,13 @@ options_t *options(int argc, char **argv)
 
     opts.n_threads = (int) sysconf(_SC_NPROCESSORS_ONLN);
 
-    while ((c = getopt(argc, argv, "+vH:p:T:b:t:h?")) != -1) {
+#ifdef PP_SERVER
+    const char *ostr = "+vH:p:T:b:t:h?";
+#else
+    const char *ostr = "+vH:p:t:h?";
+#endif
+
+    while ((c = getopt(argc, argv, ostr)) != -1) {
         switch (c) {
             case 'h':
                 usage(EXIT_SUCCESS);
@@ -88,8 +109,13 @@ options_t *options(int argc, char **argv)
                 opts.host = optarg;
                 break;
             case 'p':
+                if((int) strtol(optarg, (char **) NULL, 10) <= 0) {
+                    fprintf(stderr, "Invalid port number\n");
+                    usage(EINVAL);
+                }
                 opts.port = optarg;
                 break;
+#ifdef PP_SERVER
             case 'T': {
                 int t = (int) strtol(optarg, (char **) NULL, 10);
                 if (t > 0)
@@ -101,6 +127,7 @@ options_t *options(int argc, char **argv)
                 if (bl > 0)
                     opts.backlog = bl;
             }
+#endif
                 break;
             case 't': {
                 int nt = (int) strtol(optarg, (char **) NULL, 10);

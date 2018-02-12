@@ -20,46 +20,30 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
+#include <string.h>
+#include <errno.h>
 
+#include "protocol.h"
 #include "config.h"
-#include "server.h"
-#include "signal.h"
 
-int main(int argc, char **argv)
+const char *proto_response(const char *req, size_t *rlen)
 {
-    options_t *opts = options(argc, argv);
-    /*
-     * Block SIGINT catching for subsequent threads
-     */
-    sigset_t sigset = {{ 0 }};
-    sigset_t oldset = {{ 0 }};
-    sigaddset(&sigset, SIGINT);
-    pthread_sigmask(SIG_BLOCK, &sigset, &oldset);
+    if (strncmp(req, PP_CLIENT_REQ, (size_t) rlen) == 0) {
+        *rlen = strlen(PP_SERVER_RES);
+        return PP_SERVER_RES;
+    }
+    errno = EINVAL;
+    return NULL;
+}
 
-    tpool_t *tp = tpool_init(opts->n_threads);
-    printf("Created thread pool with %d workers.\n", tp->n_threads);
+const char *proto_hup(size_t *rlen)
+{
+    *rlen = strlen(PP_SERVER_HUP);
+    return PP_SERVER_HUP;
+}
 
-    /*
-     * Ignore those signals for the current thread.
-     */
-    ignore_signal(SIGINT);
-    ignore_signal(SIGUSR1);
-
-    /*
-     * Restore normal sigmast for this thread, but block SIGUSR1
-     */
-    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
-
-    /*
-     * This could probably have it's own separate thread
-     */
-    int ret = server_create(tp, opts);
-
-    tpool_destroy(tp);
-    printf("\n%s\n", PP_SERVER_HUP);
-
-    return ret;
+const char *proto_request(size_t *rlen)
+{
+    *rlen = strlen(PP_CLIENT_REQ);
+    return PP_CLIENT_REQ;
 }

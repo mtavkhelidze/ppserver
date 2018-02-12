@@ -39,7 +39,10 @@ socket_t *socket_init(const char *restrict host, const char *restrict port);
 int socket_listen(socket_t *restrict pps, unsigned int backlog);
 int socket_accept(socket_t *server);
 void socket_cleanup(socket_t *pps);
+int socket_connect(socket_t *restrict so);
 
 peer_addr_t *peer_addr(int pfd);
+int set_connection_timeout(int pfd, int timeout);
+int set_min_recv_len(int pfd, size_t len);
 
 #endif /* PING_PONG_SOCKET_H */

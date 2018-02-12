@@ -16,7 +16,7 @@ if (NOT DEFINED PP_PORT)
 endif ()
 
 if (NOT DEFINED PP_HOST)
-    set(PP_HOST "0.0.0.0")
+    set(PP_HOST "localhost")
 endif ()
 
 if (NOT DEFINED PP_BACKLOG)
@@ -41,8 +41,18 @@ endif ()
 
 configure_file(config.h.cmake config.h)
 
+add_executable(${PROJECT_NAME}-client
+        ppclient.c
+        options.c
+        options.h
+        socket.c
+        socket.h
+        protocol.c
+        protocol.h
+        util.c util.h)
+
 add_executable(${PROJECT_NAME}
-        main.c
+        ppserver.c
         socket.c
         socket.h
         server.c
@@ -53,7 +63,15 @@ add_executable(${PROJECT_NAME}
         tpool.h
         signal.c
         signal.h
-        options.c options.h)
+        options.c
+        options.h
+        protocol.c
+        protocol.h
+        util.c util.h)
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC PP_SERVER=1)
+target_compile_definitions(${PROJECT_NAME}-client PUBLIC PP_CLIENT=1)
+
 
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
