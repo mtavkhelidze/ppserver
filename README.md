@@ -47,6 +47,8 @@ $ make
 
 ### Build on MacOS
 
+I.e. for a specific version of `gcc`:
+
 ```bash
 $ mkdir darwin
 $ cd darwin
