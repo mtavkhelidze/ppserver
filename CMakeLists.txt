@@ -50,7 +50,8 @@ add_executable(${PROJECT_NAME}-client
         socket.h
         protocol.c
         protocol.h
-        util.c util.h)
+        util.c
+        util.h)
 
 add_executable(${PROJECT_NAME}
         ppserver.c
@@ -68,7 +69,8 @@ add_executable(${PROJECT_NAME}
         options.h
         protocol.c
         protocol.h
-        util.c util.h)
+        util.c
+        util.h)
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC PP_SERVER=1)
 target_compile_definitions(${PROJECT_NAME}-client PUBLIC PP_CLIENT=1)
