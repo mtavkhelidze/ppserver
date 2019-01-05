@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(ping-pong LANGUAGES C VERSION 1.0)
+project(ping-pong LANGUAGES C VERSION 1.1)
+set(PROJECT_AUTHOR "Misha Tavkhelidze <misha.tavkhelidze@gmail.com>")
 
 set(CMAKE_C_STANDARD 11)
 
