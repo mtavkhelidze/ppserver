@@ -17,7 +17,7 @@ if (NOT DEFINED PP_PORT)
 endif ()
 
 if (NOT DEFINED PP_HOST)
-    set(PP_HOST "localhost")
+    set(PP_HOST "0.0.0.0")
 endif ()
 
 if (NOT DEFINED PP_BACKLOG)
@@ -44,6 +44,4 @@ configure_file(config.h.cmake config.h)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_subdirectory(src/common)
-add_subdirectory(src/server)
-add_subdirectory(src/client)
+add_subdirectory(src)

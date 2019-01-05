@@ -40,15 +40,16 @@ int server_create(tpool_t *tp, options_t *opts)
         goto cleanup;
     }
 
-    if (socket_listen(srv, (unsigned int) opts->backlog) != 0) {
+    if (socket_listen(srv, opts->backlog) != 0) {
         perror("Cannot create socket");
         retval = EINVAL;
         goto cleanup;
     }
 
-    printf("Accepting connections on %s:%s (backlog: %d, ttl: %d).\n",
-           opts->host,
-           opts->port, opts->backlog, opts->ttl);
+    printf(
+        "Accepting connections on %s:%s (backlog: %d, ttl: %d).\n",
+        opts->host, opts->port, opts->backlog, opts->ttl
+    );
 
     for (;;) {
         int pfd;

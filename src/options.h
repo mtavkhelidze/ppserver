@@ -20,50 +20,20 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
+#ifndef PING_PONG_OPTIONS_H
+#define PING_PONG_OPTIONS_H
 
-#include "config.h"
-#include "server.h"
-#include "sig_handler.h"
+#include <stdbool.h>
 
-int main(int argc, char **argv)
-{
-    options_t *opts = options(argc, argv);
+typedef struct options_struct {
+    bool verbose;
+    int n_threads;
+    unsigned int backlog;
+    int ttl;
+    char *host;
+    char *port;
+} options_t;
 
-    sigset_t sigset;
-    sigset_t oldset;
-    sigemptyset(&sigset);
-    sigemptyset(&oldset);
+options_t *options(int argc, char **argv);
 
-    /*
-     * Block SIGINT catching for subsequent threads
-     */
-    sigaddset(&sigset, SIGINT);
-    pthread_sigmask(SIG_BLOCK, &sigset, &oldset);
-
-    tpool_t *tp = tpool_init(opts->n_threads);
-    printf("Created thread pool with %d workers.\n", tp->n_threads);
-
-    /*
-     * Ignore those signals for the current thread.
-     */
-    ignore_signal(SIGINT);
-    ignore_signal(SIGUSR1);
-
-    /*
-     * Restore normal sigmast for this thread, but block SIGUSR1
-     */
-    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
-
-    /*
-     * This could probably have it's own separate thread
-     */
-    int ret = server_create(tp, opts);
-
-    tpool_destroy(tp);
-    printf("\n%s\n", PP_SERVER_HUP);
-
-    return ret;
-}
+#endif /* PING_PONG_OPTIONS_H */

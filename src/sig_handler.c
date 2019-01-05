@@ -20,7 +20,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <sig_handler.h>
 #include <stddef.h>
 #include <signal.h>
 

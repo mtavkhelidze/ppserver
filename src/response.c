@@ -27,10 +27,6 @@
 #include <errno.h>
 #include <unistd.h>
 
-#ifdef __linux__
-    #include <signal.h>
-#endif
-
 #include "config.h"
 #include "socket.h"
 #include "response.h"
@@ -85,7 +81,7 @@ void response_talk(void *args)
     if (set_min_recv_len(pfd, blen) < 0 ||
         set_connection_timeout(pfd, opts.ttl) < 0) {
         goto error;
-    };
+    }
 
     do {
         ssize_t nbytes = recv(pfd, buf, blen, 0);
