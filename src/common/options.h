@@ -28,10 +28,8 @@
 typedef struct options_struct {
     bool verbose;
     int n_threads;
-#ifdef PP_SERVER
     int backlog;
     int ttl;
-#endif
     char *host;
     char *port;
 } options_t;

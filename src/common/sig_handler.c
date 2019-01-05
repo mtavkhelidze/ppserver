@@ -20,50 +20,22 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <sig_handler.h>
+#include <stddef.h>
 #include <signal.h>
 
-#include "config.h"
-#include "server.h"
-#include "signal.h"
+#include "sig_handler.h"
 
-int main(int argc, char **argv)
+static void _ignore(int sig)
 {
-    options_t *opts = options(argc, argv);
+    (void) sig;
+}
 
-    sigset_t sigset;
-    sigset_t oldset;
-    sigemptyset(&sigset);
-    sigemptyset(&oldset);
-
-    /*
-     * Block SIGINT catching for subsequent threads
-     */
-    sigaddset(&sigset, SIGINT);
-    pthread_sigmask(SIG_BLOCK, &sigset, &oldset);
-
-    tpool_t *tp = tpool_init(opts->n_threads);
-    printf("Created thread pool with %d workers.\n", tp->n_threads);
-
-    /*
-     * Ignore those signals for the current thread.
-     */
-    ignore_signal(SIGINT);
-    ignore_signal(SIGUSR1);
-
-    /*
-     * Restore normal sigmast for this thread, but block SIGUSR1
-     */
-    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
-
-    /*
-     * This could probably have it's own separate thread
-     */
-    int ret = server_create(tp, opts);
-
-    tpool_destroy(tp);
-    printf("\n%s\n", PP_SERVER_HUP);
-
-    return ret;
+void ignore_signal(int sig)
+{
+    struct sigaction s;
+    s.sa_handler = _ignore;
+    sigemptyset(&s.sa_mask);
+    s.sa_flags = 0;
+    sigaction(sig, &s, NULL);
 }

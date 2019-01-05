@@ -34,7 +34,7 @@
 #include "config.h"
 #include "socket.h"
 #include "response.h"
-#include "signal.h"
+#include "sig_handler.h"
 #include "options.h"
 #include "protocol.h"
 #include "util.h"

@@ -61,6 +61,7 @@ socket_t *socket_init(const char *restrict host, const char *restrict port)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
+    printf("%s:%s\n", host, port);
     do {
         int status;
         if ((status = getaddrinfo(host, port, &hints, &addr)) != 0) {
