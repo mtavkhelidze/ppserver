@@ -60,7 +60,6 @@ int main(int argc, char **argv)
     /*
      * This could probably have it's own separate thread
      */
-    printf(">>>>> %s %s\n", opts->host, opts->port);
     int ret = server_create(tp, opts);
 
     tpool_destroy(tp);
