@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,40 +20,19 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_TPOOL_H
-#define PING_PONG_TPOOL_H
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <pthread.h>
+#include "socket.h"
 
-typedef enum {
-    TPF_NONE = 0x0,
-    TPF_SHUTDOWN = 0x1
-} tpool_flags_t;
-
-typedef void (*functor_t)(void *);
-
-typedef struct _thread_job_t {
-    functor_t worker;
-    void *args;
-    struct _thread_job_t *next;
-} tpool_job_t;
-
-typedef struct {
-    tpool_flags_t flags;
-
-    int n_threads;
-    int n_jobs;
-
-    pthread_t *threads;
-    tpool_job_t *j_head;
-    tpool_job_t *j_tail;
-
-    pthread_cond_t job_notify;
-    pthread_mutex_t pool_lock;
-} tpool_t;
-
-tpool_t *tpool_init(int n_threads);
-int tpool_destroy(tpool_t *tp);
-int tpool_add_job(tpool_t *tp, functor_t worker, void *args);
-
-#endif /* PING_PONG_TPOOL_H */
+void report_peer_connection(int pfd, bool open)
+{
+    peer_addr_t *p;
+    p = peer_addr(pfd);
+    if (open)
+        printf("Open connection from %s on port %d\n", p->host, p->port);
+    else
+        printf("Close connection from %s on port %d\n", p->host, p->port);
+    free(p);
+}

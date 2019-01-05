@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,10 +34,8 @@
 
 options_t opts = {
     .n_threads = 1,
-#ifdef PP_SERVER
     .backlog = PP_BACKLOG,
     .ttl = PP_TTL,
-#endif
     .host = PP_HOST,
     .port = PP_PORT
 };
@@ -53,25 +51,26 @@ void usage(int code)
         "[-t THREADS] [-T TTL] [-b BACKLOG] [-v] [-h]\n\n";
 #else
     const char *header = "usage:\t%s [-H HOST] [-p PORT] [-t THREADS] "
-    "[-v] [-h]\n\n";
+                         "[-v] [-h]\n\n";
 #endif
     fprintf(ff, header, PACKAGE_NAME);
 
     if (code == 0) {
-        fprintf(ff, "Options:\n"
-                    "\t-H\thostname or IPv[4|6] address (default %s)\n"
-                    "\t-p\tport (default %s)\n"
-                    "\t-t\tnumber of threads (default: number of"
-                    " online CPUs, %d on this system)\n"
-#ifdef PP_SERVER
-                    "\t-T\tinactive connection TTL in seconds (default %d)\n"
+        fprintf(
+            ff, "Options:\n"
+                "\t-H\thostname or IPv[4|6] address (default %s)\n"
+                "\t-p\tport (default %s)\n"
+                "\t-t\tnumber of threads (default: number of"
+                " online CPUs, %d on this system)\n"
+                #ifdef PP_SERVER
+                "\t-T\tinactive connection TTL in seconds (default %d)\n"
                     "\t-b\taccept backlog (default %d)\n"
-#endif
-                    "\t-v\tbe a little bit verbose\n"
-                    "\t-h\tthis help message\n\n"
+                #endif
+                "\t-v\tbe a little bit verbose\n"
+                "\t-h\tthis help message\n\n"
 #ifdef PP_SERVER
-                    "\tNB:\tUse different combinations of -t and -b\n"
-                    "\t\tto tune this server's performance on your system.\n"
+        "\tNB:\tUse different combinations of -t and -b\n"
+        "\t\tto tune this server's performance on your system.\n"
 #endif
             , opts.host, opts.port, opts.n_threads
 #ifdef PP_SERVER
@@ -109,7 +108,7 @@ options_t *options(int argc, char **argv)
                 opts.host = optarg;
                 break;
             case 'p':
-                if((int) strtol(optarg, (char **) NULL, 10) <= 0) {
+                if ((int) strtol(optarg, (char **) NULL, 10) <= 0) {
                     fprintf(stderr, "Invalid port number\n");
                     usage(EINVAL);
                 }

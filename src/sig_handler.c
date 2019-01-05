@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,11 +20,21 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_UTIL_H
-#define PING_PONG_UTIL_H
+#include <stddef.h>
+#include <signal.h>
 
-#include <stdbool.h>
+#include "sig_handler.h"
 
-void report_peer_connection(int pfd, bool open);
+static void _ignore(int sig)
+{
+    (void) sig;
+}
 
-#endif /* PING_PONG_UTIL_H */
+void ignore_signal(int sig)
+{
+    struct sigaction s;
+    s.sa_handler = _ignore;
+    sigemptyset(&s.sa_mask);
+    s.sa_flags = 0;
+    sigaction(sig, &s, NULL);
+}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,22 +20,12 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_OPTIONS_H
-#define PING_PONG_OPTIONS_H
+#ifndef PING_PONG_SERVER_H
+#define PING_PONG_SERVER_H
 
-#include <stdbool.h>
+#include "tpool.h"
+#include "options.h"
 
-typedef struct options_struct {
-    bool verbose;
-    int n_threads;
-#ifdef PP_SERVER
-    int backlog;
-    int ttl;
-#endif
-    char *host;
-    char *port;
-} options_t;
+int server_create(tpool_t *tp, options_t *opts);
 
-options_t *options(int argc, char **argv);
-
-#endif /* PING_PONG_OPTIONS_H */
+#endif /* PING_PONG_SERVER_H */

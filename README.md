@@ -1,14 +1,13 @@
 Ping-Pong CS
 ---
 
-A simple multi-threaded server and client demo in [C11](1) using [pthreads](2).
+A simple multi-threaded server demo in [C11](1) using [pthreads](2).
 
 ---
 
 ## Running
 
 Once build (see below) run `ping-pong -h`
-(server) or `ping-pong-client -h` (client).
 
 ## Prerequisites
 
@@ -33,7 +32,7 @@ Substitute `<RELEASE_NAME>` below with either `Release` of `Debug`.
 After build is finished the executable name will be `ping-pong`.
 
 ```bash
-$ ./ping-pong -h
+$ src/ping-pong -h
 ```
 
 ### Build on CentOS

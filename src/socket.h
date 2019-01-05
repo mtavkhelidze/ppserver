@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,19 +20,29 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <signal.h>
-#include <stddef.h>
+#ifndef PING_PONG_SOCKET_H
+#define PING_PONG_SOCKET_H
 
-static void _ignore(int sig)
-{
-    (void) sig;
-}
+#include <netdb.h>
 
-void ignore_signal(int sig)
-{
-    struct sigaction s;
-    s.sa_handler = _ignore;
-    sigemptyset(&s.sa_mask);
-    s.sa_flags = 0;
-    sigaction(sig, &s, NULL);
-}
+typedef struct {
+    int sd;
+    struct addrinfo *addr;
+} socket_t;
+
+typedef struct {
+    int port;
+    char host[INET6_ADDRSTRLEN];
+} peer_addr_t;
+
+socket_t *socket_init(const char *restrict host, const char *restrict port);
+int socket_listen(socket_t *restrict pps, unsigned int backlog);
+int socket_accept(socket_t *server);
+void socket_cleanup(socket_t *pps);
+int socket_connect(socket_t *restrict so);
+
+peer_addr_t *peer_addr(int pfd);
+int set_connection_timeout(int pfd, int timeout);
+int set_min_recv_len(int pfd, size_t len);
+
+#endif /* PING_PONG_SOCKET_H */

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,15 +20,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_RESPONSE_H
-#define PING_PONG_RESPONSE_H
+#ifndef PING_PONG_UTIL_H
+#define PING_PONG_UTIL_H
 
 #include <stdbool.h>
 
-typedef struct {
-    int pfd;
-} response_t;
+void report_peer_connection(int pfd, bool open);
 
-void response_talk(void *args);
-
-#endif /* PING_PONG_RESPONSE_H */
+#endif /* PING_PONG_UTIL_H */

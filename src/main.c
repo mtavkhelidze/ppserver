@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,29 +20,50 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_SOCKET_H
-#define PING_PONG_SOCKET_H
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
 
-#include <netdb.h>
+#include "config.h"
+#include "server.h"
+#include "sig_handler.h"
 
-typedef struct {
-    int sd;
-    struct addrinfo *addr;
-} socket_t;
+int main(int argc, char **argv)
+{
+    options_t *opts = options(argc, argv);
 
-typedef struct {
-    int port;
-    char host[INET6_ADDRSTRLEN];
-} peer_addr_t;
+    sigset_t sigset;
+    sigset_t oldset;
+    sigemptyset(&sigset);
+    sigemptyset(&oldset);
 
-socket_t *socket_init(const char *restrict host, const char *restrict port);
-int socket_listen(socket_t *restrict pps, unsigned int backlog);
-int socket_accept(socket_t *server);
-void socket_cleanup(socket_t *pps);
-int socket_connect(socket_t *restrict so);
+    /*
+     * Block SIGINT catching for subsequent threads
+     */
+    sigaddset(&sigset, SIGINT);
+    pthread_sigmask(SIG_BLOCK, &sigset, &oldset);
 
-peer_addr_t *peer_addr(int pfd);
-int set_connection_timeout(int pfd, int timeout);
-int set_min_recv_len(int pfd, size_t len);
+    tpool_t *tp = tpool_init(opts->n_threads);
+    printf("Created thread pool with %d workers.\n", tp->n_threads);
 
-#endif /* PING_PONG_SOCKET_H */
+    /*
+     * Ignore those signals for the current thread.
+     */
+    ignore_signal(SIGINT);
+    ignore_signal(SIGUSR1);
+
+    /*
+     * Restore normal sigmask for this thread, but block SIGUSR1
+     */
+    pthread_sigmask(SIG_SETMASK, &oldset, NULL);
+
+    /*
+     * This could probably have it's own separate thread
+     */
+    int ret = server_create(tp, opts);
+
+    tpool_destroy(tp);
+    printf("\n%s\n", PP_SERVER_HUP);
+
+    return ret;
+}

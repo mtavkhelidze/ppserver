@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,19 +20,9 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef PING_PONG_SIGNAL_H
+#define PING_PONG_SIGNAL_H
 
-#include "socket.h"
+void ignore_signal(int sig);
 
-void report_peer_connection(int pfd, bool open)
-{
-    peer_addr_t *p;
-    p = peer_addr(pfd);
-    if (open)
-        printf("Open connection from %s on port %d\n", p->host, p->port);
-    else
-        printf("Close connection from %s on port %d\n", p->host, p->port);
-    free(p);
-}
+#endif /* PING_PONG_SIGNAL_H */

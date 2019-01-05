@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,9 +20,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_SIGNAL_H
-#define PING_PONG_SIGNAL_H
+#ifndef PING_PONG_PROTOCOL_H
+#define PING_PONG_PROTOCOL_H
 
-void ignore_signal(int sig);
+const char *proto_response(const char *req, size_t *rlen);
+const char *proto_request(size_t *rlen);
+const char *proto_hup(size_t *rlen);
 
-#endif /* PING_PONG_SIGNAL_H */
+#endif /* PING_PONG_PROTOCOL_H */

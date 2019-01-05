@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,11 +20,20 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef PING_PONG_PROTOCOL_H
-#define PING_PONG_PROTOCOL_H
+#ifndef PING_PONG_OPTIONS_H
+#define PING_PONG_OPTIONS_H
 
-const char *proto_response(const char *req, size_t *rlen);
-const char *proto_request(size_t *rlen);
-const char *proto_hup(size_t *rlen);
+#include <stdbool.h>
 
-#endif /* PING_PONG_PROTOCOL_H */
+typedef struct options_struct {
+    bool verbose;
+    int n_threads;
+    unsigned int backlog;
+    int ttl;
+    char *host;
+    char *port;
+} options_t;
+
+options_t *options(int argc, char **argv);
+
+#endif /* PING_PONG_OPTIONS_H */

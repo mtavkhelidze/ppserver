@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
+ * Copyright (c) 2018-2019 Misha Tavkhelidze <misha.tavkhelidze@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -27,14 +27,10 @@
 #include <errno.h>
 #include <unistd.h>
 
-#ifdef __linux__
-    #include <signal.h>
-#endif
-
 #include "config.h"
 #include "socket.h"
 #include "response.h"
-#include "signal.h"
+#include "sig_handler.h"
 #include "options.h"
 #include "protocol.h"
 #include "util.h"
@@ -85,7 +81,7 @@ void response_talk(void *args)
     if (set_min_recv_len(pfd, blen) < 0 ||
         set_connection_timeout(pfd, opts.ttl) < 0) {
         goto error;
-    };
+    }
 
     do {
         ssize_t nbytes = recv(pfd, buf, blen, 0);

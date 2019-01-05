@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13)
 
-project(ping-pong LANGUAGES C VERSION 1.0)
+project(ping-pong LANGUAGES C VERSION 1.1)
+set(PROJECT_AUTHOR "Misha Tavkhelidze <misha.tavkhelidze@gmail.com>")
 
 set(CMAKE_C_STANDARD 11)
 
@@ -17,7 +18,7 @@ if (NOT DEFINED PP_PORT)
 endif ()
 
 if (NOT DEFINED PP_HOST)
-    set(PP_HOST "localhost")
+    set(PP_HOST "0.0.0.0")
 endif ()
 
 if (NOT DEFINED PP_BACKLOG)
@@ -42,37 +43,6 @@ endif ()
 
 configure_file(config.h.cmake config.h)
 
-add_executable(${PROJECT_NAME}-client
-        ppclient.c
-        options.c
-        options.h
-        socket.c
-        socket.h
-        protocol.c
-        protocol.h
-        util.c util.h)
-
-add_executable(${PROJECT_NAME}
-        ppserver.c
-        socket.c
-        socket.h
-        server.c
-        server.h
-        response.c
-        response.h
-        tpool.c
-        tpool.h
-        signal.c
-        signal.h
-        options.c
-        options.h
-        protocol.c
-        protocol.h
-        util.c util.h)
-
-target_compile_definitions(${PROJECT_NAME} PUBLIC PP_SERVER=1)
-target_compile_definitions(${PROJECT_NAME}-client PUBLIC PP_CLIENT=1)
-
-
-target_link_libraries(${PROJECT_NAME} Threads::Threads)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+add_subdirectory(src)
