@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "config.h"
 #include "socket.h"
